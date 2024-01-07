@@ -21,6 +21,8 @@ local query_size = Gio.FILE_ATTRIBUTE_FILESYSTEM_SIZE
 local query_free = Gio.FILE_ATTRIBUTE_FILESYSTEM_FREE
 local query_used = Gio.FILE_ATTRIBUTE_FILESYSTEM_USED
 local query      = query_size .. "," .. query_free .. "," .. query_used
+local lain       = require("lain")
+local markup     = lain.util.markup
 
 -- File systems info
 -- lain.widget.fs
@@ -31,9 +33,9 @@ local function factory(args)
     local fs = {
         widget = args.widget or wibox.widget.textbox(),
         units = {
-            [1] = "Kb", [2] = "Mb", [3] = "Gb",
-            [4] = "Tb", [5] = "Pb", [6] = "Eb",
-            [7] = "Zb", [8] = "Yb"
+            [1] = "Ko", [2] = "Mo", [3] = "Go",
+            [4] = "To", [5] = "Po", [6] = "Eo",
+            [7] = "Zo", [8] = "Yo"
         }
     }
 
@@ -65,9 +67,9 @@ local function factory(args)
 
     if not fs.notification_preset then
         fs.notification_preset = {
-            font = "Monospace 10",
-            fg   = "#FFFFFF",
-            bg   = "#000000"
+            font = "Iosevka NFM",
+            fg   = "#BF616A",
+            bg   = "#2E3440"
         }
     end
 
@@ -114,9 +116,9 @@ local function factory(args)
         if partition and fs_now[partition] and fs_now[partition].percentage >= threshold then
             if not helpers.get_map(partition) then
                 naughty.notify {
-                    preset = naughty.config.presets.critical,
-                    title  = "Warning",
-                    text   = string.format("%s is above %d%% (%d%%)", partition, threshold, fs_now[partition].percentage)
+                    preset ={ font = "Iosevka NFM 10", fg = "#BF616A", bg = "#272C36" },
+                    title  = "Partition pleine !",
+                    text   = string.format("%3.1f %s disponibles sur %s", fs_now[partition].free, fs_now[partition].units, partition)
                 }
                 helpers.set_map(partition, true)
             else
@@ -125,8 +127,8 @@ local function factory(args)
         end
 
         local fmt = "%-" .. tostring(pathlen) .. "s %4s\t%6s\t%6s\n"
-        local notifytable = { [1] = string.format(fmt, "path", "used", "free", "size") }
-        fmt = "\n%-" .. tostring(pathlen) .. "s %3s%%\t%6.2f\t%6.2f %s"
+        local notifytable = { [1] = string.format(fmt, markup.fontfg("Iosevka NFM 10", "#88C0D0","Partition"), markup.fontfg("Iosevka NFM 10", "#88C0D0", "    %"), markup.fontfg("Iosevka NFM 10", "#88C0D0"," Disp."), markup.fontfg("Iosevka NFM 10", "#88C0D0"," Total")) }
+        fmt = "\n%-" .. tostring(pathlen) .. "s %3s%%\t%6.1f\t%6.1f %s"
         for _, path in ipairs(notifypaths) do
             notifytable[#notifytable+1] = string.format(fmt, path, fs_now[path].percentage, fs_now[path].free, fs_now[path].size, fs_now[path].units)
         end
