@@ -95,6 +95,7 @@ local function factory(args)
             settings()
 
             if mpd_now.state == "play" then
+                naughty.destroy_all_notifications()
                 if notify == "on" and mpd_now.title ~= helpers.get_map("current mpd track") then
                     helpers.set_map("current mpd track", mpd_now.title)
 
