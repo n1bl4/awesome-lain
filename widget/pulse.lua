@@ -21,23 +21,18 @@ local function factory(args)
     local timeout  = args.timeout or 5
     local settings = args.settings or function() end
 
-    pulse.devicetype = args.devicetype or "sink"
-    pulse.cmd = args.cmd or "pacmd list-" .. pulse.devicetype .. "s | sed -n -e '/*/,$!d' -e '/index/p' -e '/base volume/d' -e '/volume:/p' -e '/muted:/p' -e '/device\\.string/p'"
+    pulse.cmd = args.cmd or "pactl get-sink-volume @DEFAULT_SINK@ | cut -s -d/ -f2,4; pactl get-sink-mute @DEFAULT_SINK@"
 
     function pulse.update()
         helpers.async({ shell, "-c", type(pulse.cmd) == "string" and pulse.cmd or pulse.cmd() },
         function(s)
             volume_now = {
-                index  = string.match(s, "index: (%S+)") or "N/A",
-                device = string.match(s, "device.string = \"(%S+)\"") or "N/A",
-                muted  = string.match(s, "muted: (%S+)") or "N/A"
+                muted  = string.match(s, "Mute: (%S+)") or "N/A"
             }
-
-            pulse.device = volume_now.index
 
             local ch = 1
             volume_now.channel = {}
-            for v in string.gmatch(s, ":.-(%d+)%%") do
+            for v in string.gmatch(s, "(%d+)%%") do
                 volume_now.channel[ch] = v
                 ch = ch + 1
             end
