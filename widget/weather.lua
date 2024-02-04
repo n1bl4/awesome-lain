@@ -36,12 +36,12 @@ local function factory(args)
     local icons_path            = args.icons_path or helpers.icons_dir .. "openweathermap/"
     local notification_preset   = args.notification_preset or {}
     local notification_text_fun = args.notification_text_fun or
-                                  function (wn)
-                                      local day = os.date("%a %d", wn["dt"])
-                                      local temp = math.floor(wn["main"]["temp"])
-                                      local desc = wn["weather"][1]["description"]
-                                      return string.format("<b>%s</b>: %s, %d ", day, desc, temp)
-                                  end
+        function (wn)
+            local day = os.date("%a %d/%m, %Hh:", wn["dt"])
+            local temp = math.floor(wn["main"]["temp"])
+            local desc = wn["weather"][1]["description"]
+            return string.format("<b>%s</b>%3d°C, %s", day, temp,desc)
+        end
     local weather_na_markup     = args.weather_na_markup or " N/A "
     local followtag             = args.followtag or false
     local showpopup             = args.showpopup or "on"
@@ -97,6 +97,7 @@ local function factory(args)
             if not err and type(weather_now) == "table" and tonumber(weather_now["cod"]) == 200 then
                 weather.notification_text = ""
                 for i = 1, weather_now["cnt"], math.floor(weather_now["cnt"] / cnt) do
+                    -- i = 1+8*(i-1)
                     weather.notification_text = weather.notification_text ..
                                                 notification_text_fun(weather_now["list"][i])
                     if i < weather_now["cnt"] then
