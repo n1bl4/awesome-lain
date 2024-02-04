@@ -6,6 +6,7 @@
 
 --]]
 
+local lain     = require("lain")
 local helpers  = require("lain.helpers")
 local shell    = require("awful.util").shell
 local escape_f = require("awful.util").escape
@@ -70,7 +71,7 @@ local function factory(args)
                     if     k == "state"          then mpd_now.state        = v
                     elseif k == "file"           then mpd_now.file         = v
                     elseif k == "Name"           then mpd_now.name         = escape_f(v)
-                    elseif k == "Artist"         then mpd_now.artist       = escape_f(v)
+                    elseif k == "Artist"         then mpd_now.artist       = v
                     elseif k == "Title"          then mpd_now.title        = escape_f(v)
                     elseif k == "Album"          then mpd_now.album        = escape_f(v)
                     elseif k == "Genre"          then mpd_now.genre        = escape_f(v)
@@ -89,13 +90,11 @@ local function factory(args)
                 end
             end
 
-            mpd_notification_preset.text = string.format("%s (%s) - %s\n%s", mpd_now.artist,
-                                           mpd_now.album, mpd_now.date, mpd_now.title)
+            mpd_notification_preset.text = string.format("%s (%s) - %s\n%s", mpd_now.artist, mpd_now.album, mpd_now.date, mpd_now.title)
             widget = mpd.widget
             settings()
 
             if mpd_now.state == "play" then
-                naughty.destroy_all_notifications()
                 if notify == "on" and mpd_now.title ~= helpers.get_map("current mpd track") then
                     helpers.set_map("current mpd track", mpd_now.title)
 
@@ -105,8 +104,11 @@ local function factory(args)
                         preset      = mpd_notification_preset,
                         icon        = default_art,
                         icon_size   = cover_size,
+                        title       = string.format("%s", mpd_now.artist),
+                        text        = string.format("%s\n" .. lain.util.markup.italic("%s (%s)"), mpd_now.title, mpd_now.album, mpd_now.date),
                         replaces_id = mpd.id
                     }
+
 
                     if not string.match(mpd_now.file, "http.*://") then -- local file instead of http stream
                         local path   = string.format("%s/%s", music_dir, string.match(mpd_now.file, ".*/"))
