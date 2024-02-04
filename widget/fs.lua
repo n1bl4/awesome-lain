@@ -88,7 +88,7 @@ local function factory(args)
                 local used = info:get_attribute_uint64(query_used)
                 local free = info:get_attribute_uint64(query_free)
 
-                if size > 0 then
+                if size > 10000000 then
                     local units = math.floor(math.log(size)/math.log(1024))
 
                     fs_now[path] = {
@@ -126,9 +126,9 @@ local function factory(args)
             end
         end
 
-        local fmt = "%-" .. tostring(pathlen) .. "s %4s\t%6s\t%6s\n"
+        local fmt = "%-" .. tostring(pathlen) .. "s\t%4s\t%6s\t%6s\n"
         local notifytable = { [1] = string.format(fmt, markup.fontfg("Iosevka NFM 10", "#88C0D0","Partition"), markup.fontfg("Iosevka NFM 10", "#88C0D0", "    %"), markup.fontfg("Iosevka NFM 10", "#88C0D0"," Disp."), markup.fontfg("Iosevka NFM 10", "#88C0D0"," Total")) }
-        fmt = "\n%-" .. tostring(pathlen) .. "s %3s%%\t%6.1f\t%6.1f %s"
+        fmt = "\n%-" .. tostring(pathlen) .. "s\t%4s%%\t%6.1f\t%6.1f %s"
         for _, path in ipairs(notifypaths) do
             notifytable[#notifytable+1] = string.format(fmt, path, fs_now[path].percentage, fs_now[path].free, fs_now[path].size, fs_now[path].units)
         end
